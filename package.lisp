@@ -2,4 +2,5 @@
 
 (defpackage #:callbook
   (:use #:cl)
-  (:export :lookup-call))
+  (:export :callbook-lookup
+	   :hamqth-lookup))
