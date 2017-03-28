@@ -5,7 +5,7 @@
   :author "Jeff Francis <jeff@gritch.org>"
   :license "MIT, see file LICENSE"
   :depends-on (#:cl-json
-	       #:s-xml
+	       #:xmls
 	       #:read-number
 	       #:aviation-formulary
 	       #:babel

@@ -85,16 +85,16 @@
 (defun get-session-id (login passwd)
   "Given a login and a passwd, return either a hamqth session id or
 nil."
-  (let ((session (second
-		  (second
-		   (s-xml:parse-xml-string
+  (let ((session (third
+		  (third
+		   (xmls:parse
 		    (babel:octets-to-string
 		     (drakma:http-request
 		      (concatenate 'string "https://www.hamqth.com/xml.php?u=" login "&p=" passwd)
 		      :method :get))
-		    :output-type :lxml)))))
-    (if (eq 'NS-0:|session_id| (first session))
-	(second session)
+		    :compress-whitespace t)))))
+    (if (equal "session_id" (first (first session)))
+	(third session)
 	nil)))
 
 (defun hamqth-lookup (login passwd call)
