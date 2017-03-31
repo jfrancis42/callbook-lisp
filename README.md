@@ -1,6 +1,6 @@
 # callbook
 
-Callbook is a library for pulling ham radio license info for hams from either the callbook.info API or the HamQTH.com API and returning an object with information about the operator and his QTH. callbook.info requires no pre-registration, but contains data for US hams only. HamQTH.como requires you to create a free account on their web site before you can fetch data via the API.
+Callbook is a library for pulling ham radio license info for hams from either the callbook.info API or the HamQTH.com API and returning an object with information about the operator and his QTH. callbook.info requires no pre-registration, but contains data for US hams only. HamQTH.com requires you to create a free account on their web site before you can fetch data via their API.
 
 Using the API is very simple. First, an example of fetching info from callbook.info. This requires nothing more than the callsign to be looked up:
 
