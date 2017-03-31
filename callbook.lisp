@@ -4,6 +4,9 @@
 
 ;;; "callbook" goes here. Hacks and glory await!
 
+(defparameter *timestamp* 0)
+(defparameter *session* nil)
+
 ; This defines a ham. Subclassed from 2d-point in the aviation
 ; formulary.
 (defclass ham (af:2d-point)
@@ -97,10 +100,17 @@ nil."
 	nil)))
 
 (defun hamqth-lookup (login passwd call)
-  "Look up a callsign on hamqth.com using their API."
-  (make-ham-from-hamqth
-   (let ((session (get-session-id login passwd)))
-     (when session
+  "Look up a callsign on hamqth.com using their API. If there's
+already a session key that's less than an hour old (I padded this by
+30 seconds just to be safe), then call the API, else grab and store a
+new session key, then call the API."
+  (let ((now (local-time:timestamp-to-unix (local-time:now))))
+    (unless (and *session*
+		 (<= (- now *timestamp*) 3570))
+      (setf *timestamp* now)
+      (setf *session* (get-session-id login passwd)))
+    (when *session*
+      (make-ham-from-hamqth
        (mapcar
 	(lambda (n)
 	  (cons (first (first n)) (third n)))
@@ -112,10 +122,9 @@ nil."
 	     (drakma:http-request
 	      (concatenate 'string
 			   "https://www.hamqth.com/xml.php?id="
-			   session
+			   *session*
 			   "&callsign="
 			   call
 			   "&prg=callbook")
 	      :method :get))
 	    :compress-whitespace t)))))))))
-
