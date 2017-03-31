@@ -22,12 +22,6 @@
    (grid :accessor grid
 	 :initarg :grid
 	 :initform nil)
-   (lat :accessor lat
-	:initarg :lat
-	:initform nil)
-   (lon :accessor lon
-	:initarg :lon
-	:initform nil)
    (email :accessor email
 	  :initarg :email
 	  :initform nil)
