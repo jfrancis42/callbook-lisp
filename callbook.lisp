@@ -7,8 +7,13 @@
 (defparameter *timestamp* 0)
 (defparameter *session* nil)
 
-; This defines a ham. Subclassed from 2d-point in the aviation
-; formulary.
+(defmacro cdr-assoc (name alist)
+  "Replaces '(cdr (assoc name alist))' because it's used a bajillion
+times when doing API stuff."
+  `(cdr (assoc ,name ,alist :test #'equal)))
+
+;; This defines a ham. Subclassed from 2d-point in the aviation
+;; formulary.
 (defclass ham (af:2d-point)
   ((call :accessor call
 	 :initarg :call
@@ -37,18 +42,25 @@
 
 (defun make-ham-from-callbook (thing)
   "Create a ham object from a callbook lookup."
-  (when (equal "VALID" (cdr (assoc :status thing)))
-    (let ((lat-thing (cdr (assoc :latitude (cdr (assoc :location thing)))))
-	  (lon-thing (cdr (assoc :longitude (cdr (assoc :location thing))))))
+  (when (equal "VALID" (cdr-assoc :status thing))
+    (let ((lat-thing (cdr-assoc :latitude (cdr-assoc :location thing)))
+	  (lon-thing (cdr-assoc :longitude (cdr-assoc :location thing))))
       (make-instance 'ham
-		     :call (cdr (assoc :callsign (cdr (assoc :current thing))))
-		     :name (cdr (assoc :name thing))
-		     :lic-class (cdr (assoc :oper-class (cdr (assoc :current thing))))
-		     :grid (cdr (assoc :gridsquare (cdr (assoc :location thing))))
-		     :lat (unless (equal lat-thing "") (with-input-from-string (in lat-thing) (read-number:read-float in)))
-		     :lon (unless (equal lon-thing "") (with-input-from-string (in lon-thing) (read-number:read-float in)))
-		     :street (cdr (assoc :line-1 (cdr (assoc :address thing))))
-		     :city (cdr (assoc :line-2 (cdr (assoc :address thing))))
+		     :call (cdr-assoc :callsign (cdr-assoc :current thing))
+		     :name (cdr-assoc :name thing)
+		     :lic-class (cdr-assoc :oper-class (cdr-assoc :current thing))
+		     :grid (cdr-assoc :gridsquare (cdr-assoc :location thing))
+		     :lat (unless (equal lat-thing "")
+			    (with-input-from-string
+				(in lat-thing)
+			      (read-number:read-float in)))
+		     :lon (unless
+			      (equal lon-thing "")
+			    (with-input-from-string
+				(in lon-thing)
+			      (read-number:read-float in)))
+		     :street (cdr-assoc :line-1 (cdr-assoc :address thing))
+		     :city (cdr-assoc :line-2 (cdr-assoc :address thing))
 		     :country "United States"))))
 
 (defun make-ham-from-hamqth (thing)
@@ -76,7 +88,8 @@
   (make-ham-from-callbook
    (json:decode-json-from-string
     (babel:octets-to-string
-     (drakma:http-request (concatenate 'string "https://callook.info/" call "/json") :method :get)))))
+     (drakma:http-request
+      (concatenate 'string "https://callook.info/" call "/json") :method :get)))))
 
 (defun get-session-id (login passwd)
   "Given a login and a passwd, return either a hamqth session id or
@@ -86,7 +99,9 @@ nil."
 		   (xmls:parse
 		    (babel:octets-to-string
 		     (drakma:http-request
-		      (concatenate 'string "https://www.hamqth.com/xml.php?u=" login "&p=" passwd)
+		      (concatenate 'string
+				   "https://www.hamqth.com/xml.php?u="
+				   login "&p=" passwd)
 		      :method :get))
 		    :compress-whitespace t)))))
     (if (equal "session_id" (first (first session)))
