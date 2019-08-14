@@ -65,23 +65,25 @@ times when doing API stuff."
 
 (defun make-ham-from-hamqth (thing)
   "Create a ham object from a hamqth lookup."
-  (make-instance 'ham
-		 :call (string-upcase (cdr (assoc "callsign" thing :test 'equal)))
-		 :name (cdr (assoc "adr_name" thing :test 'equal))
-		 :grid (cdr (assoc "grid" thing :test 'equal))
-		 :lat (with-input-from-string
-			  (in (cdr (assoc "latitude" thing :test 'equal)))
-			(read-number:read-float in))
-		 :lon (with-input-from-string
-			  (in (cdr (assoc "longitude" thing :test 'equal)))
-			(read-number:read-float in))
-		 :email (cdr (assoc "email" thing :test 'equal))
-		 :street (cdr (assoc "adr_street1" thing :test 'equal))
-		 :city (concatenate 'string
-				    (cdr (assoc "adr_city" thing :test 'equal)) " "
-				    (cdr (assoc "us_state" thing :test 'equal)) " "
-				    (cdr (assoc "adr_zip" thing :test 'equal)))
-		 :country (cdr (assoc "adr_country" thing :test 'equal))))
+  (if (cdr (assoc "callsign" thing :test 'equal))
+      (make-instance 'ham
+		     :call (string-upcase (cdr (assoc "callsign" thing :test 'equal)))
+		     :name (cdr (assoc "adr_name" thing :test 'equal))
+		     :grid (cdr (assoc "grid" thing :test 'equal))
+		     :lat (with-input-from-string
+			      (in (cdr (assoc "latitude" thing :test 'equal)))
+			    (read-number:read-float in))
+		     :lon (with-input-from-string
+			      (in (cdr (assoc "longitude" thing :test 'equal)))
+			    (read-number:read-float in))
+		     :email (cdr (assoc "email" thing :test 'equal))
+		     :street (cdr (assoc "adr_street1" thing :test 'equal))
+		     :city (concatenate 'string
+					(cdr (assoc "adr_city" thing :test 'equal)) " "
+					(cdr (assoc "us_state" thing :test 'equal)) " "
+					(cdr (assoc "adr_zip" thing :test 'equal)))
+		     :country (cdr (assoc "adr_country" thing :test 'equal)))
+      nil))
 
 (defun callbook-lookup (call)
   "Look up a callsign on callbook.info using their API."
@@ -96,7 +98,7 @@ times when doing API stuff."
 nil."
   (let ((session (third
 		  (third
-		   (xmls:parse
+		   (xmls:parse-to-list
 		    (babel:octets-to-string
 		     (drakma:http-request
 		      (concatenate 'string
@@ -126,7 +128,7 @@ new session key, then call the API."
 	(rest
 	 (rest
 	  (third
-	   (xmls:parse
+	   (xmls:parse-to-list
 	    (babel:octets-to-string
 	     (drakma:http-request
 	      (concatenate 'string
