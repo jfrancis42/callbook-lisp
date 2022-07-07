@@ -43,25 +43,16 @@ times when doing API stuff."
 (defun make-ham-from-callbook (thing)
   "Create a ham object from a callbook lookup."
   (when (equal "VALID" (cdr-assoc :status thing))
-    (let ((lat-thing (cdr-assoc :latitude (cdr-assoc :location thing)))
-	  (lon-thing (cdr-assoc :longitude (cdr-assoc :location thing))))
-      (make-instance 'ham
-		     :call (cdr-assoc :callsign (cdr-assoc :current thing))
-		     :name (cdr-assoc :name thing)
-		     :lic-class (cdr-assoc :oper-class (cdr-assoc :current thing))
-		     :grid (cdr-assoc :gridsquare (cdr-assoc :location thing))
-		     :lat (unless (equal lat-thing "")
-			    (with-input-from-string
-				(in lat-thing)
-			      (read-number:read-float in)))
-		     :lon (unless
-			      (equal lon-thing "")
-			    (with-input-from-string
-				(in lon-thing)
-			      (read-number:read-float in)))
-		     :street (cdr-assoc :line-1 (cdr-assoc :address thing))
-		     :city (cdr-assoc :line-2 (cdr-assoc :address thing))
-		     :country "United States"))))
+    (make-instance 'ham
+		   :call (cdr-assoc :callsign (cdr-assoc :current thing))
+		   :name (cdr-assoc :name thing)
+		   :lic-class (cdr-assoc :oper-class (cdr-assoc :current thing))
+		   :grid (cdr-assoc :gridsquare (cdr-assoc :location thing))
+		   :lat (cdr-assoc :latitude (cdr-assoc :location thing))
+		   :lon (cdr-assoc :longitude (cdr-assoc :location thing))
+		   :street (cdr-assoc :line-1 (cdr-assoc :address thing))
+		   :city (cdr-assoc :line-2 (cdr-assoc :address thing))
+		   :country "United States")))
 
 (defun make-ham-from-hamqth (thing)
   "Create a ham object from a hamqth lookup."
